@@ -1,0 +1,42 @@
+# In your project root
+cat > .gitignore << 'EOF'
+# Data files
+*.csv
+*.bmp
+*.ply
+*.zip
+KEYENCE_DATASET/
+OneDrive_1_9-15-2025/
+python_code/files/cleaned_output/
+cpp_code_for_jay.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+EOF
+
+# Build directories
+build/
+Build/
+*/build/
+
+# Compiled files
+*.exe
+*.obj
+*.a
+*.bin
+*.o
+
+# CMake
+CMakeCache.txt
+CMakeFiles/

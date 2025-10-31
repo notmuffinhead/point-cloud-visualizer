@@ -1,0 +1,3 @@
+from simple_visualizer_8 import quick_keyence_analysis
+
+quick_keyence_analysis('KEYENCE_DATASET_PYTHON_COPY')
