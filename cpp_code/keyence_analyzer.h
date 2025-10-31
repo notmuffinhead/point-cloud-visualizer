@@ -10,6 +10,7 @@
 // Forward declarations for VTK types
 class vtkStructuredGrid;
 class vtkRenderWindow;
+class vtkPolyData;  
 
 namespace keyence {
 
@@ -182,10 +183,11 @@ private:
      * @param col_indices Column sampling indices
      * @return VTK structured grid (caller must delete)
      */
-    vtkStructuredGrid* createVTKStructuredGrid(
+    vtkPolyData* createVTKPolyData(
         const Eigen::MatrixXf& heights,
         const std::vector<int>& row_indices,
         const std::vector<int>& col_indices);
+
     
     // ═══════════════════════════════════════════════════════════════
     // Utility Methods

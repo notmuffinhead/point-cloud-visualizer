@@ -29,6 +29,8 @@
 #include <vtkAxesActor.h>
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkGeometryFilter.h>
+#include <vtkQuad.h>
+#include <vtkCellArray.h>
 
 namespace fs = std::filesystem;
 
@@ -219,7 +221,7 @@ Eigen::MatrixXf KeyenceAnalyzer::createDisplaySample(
 // STEP 5: Visualization
 // ═══════════════════════════════════════════════════════════════════
 
-vtkStructuredGrid* KeyenceAnalyzer::createVTKStructuredGrid(
+vtkPolyData* KeyenceAnalyzer::createVTKPolyData(
     const Eigen::MatrixXf& heights,
     const std::vector<int>& row_indices,
     const std::vector<int>& col_indices) {
@@ -227,38 +229,53 @@ vtkStructuredGrid* KeyenceAnalyzer::createVTKStructuredGrid(
     int rows = heights.rows();
     int cols = heights.cols();
     
-    // Create structured grid
-    vtkStructuredGrid* structuredGrid = vtkStructuredGrid::New();
-    structuredGrid->SetDimensions(cols, rows, 1);
-    
-    // Create points and scalars
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     vtkSmartPointer<vtkFloatArray> scalars = vtkSmartPointer<vtkFloatArray>::New();
     scalars->SetName("Height");
     
+    // Map from (i,j) to point index
+    std::vector<std::vector<int>> point_map(rows, std::vector<int>(cols, -1));
+    int point_idx = 0;
+    
+    // Add valid points
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            // Physical coordinates in μm
-            float x_um = col_indices[j] * pixel_pitch_x_;
-            float y_um = row_indices[i] * pixel_pitch_y_;
-            float z_um = heights(i, j) * 1000.0f;  // mm to μm
-            
-            // Add point (even if NaN - VTK will handle it)
-            if (!std::isnan(z_um)) {
+            float z_mm = heights(i, j);
+            if (!std::isnan(z_mm)) {
+                float x_um = col_indices[j] * pixel_pitch_x_;
+                float y_um = row_indices[i] * pixel_pitch_y_;
+                float z_um = z_mm * 1000.0f;
+                
                 points->InsertNextPoint(x_um, y_um, z_um);
                 scalars->InsertNextValue(z_um);
-            } else {
-                // Use zero for invalid points (won't be rendered)
-                points->InsertNextPoint(x_um, y_um, 0.0f);
-                scalars->InsertNextValue(0.0f);
+                point_map[i][j] = point_idx++;
             }
         }
     }
     
-    structuredGrid->SetPoints(points);
-    structuredGrid->GetPointData()->SetScalars(scalars);
+    // Create quads for valid cells
+    vtkSmartPointer<vtkCellArray> polys = vtkSmartPointer<vtkCellArray>::New();
     
-    return structuredGrid;
+    for (int i = 0; i < rows - 1; ++i) {
+        for (int j = 0; j < cols - 1; ++j) {
+            int p0 = point_map[i][j];
+            int p1 = point_map[i][j+1];
+            int p2 = point_map[i+1][j+1];
+            int p3 = point_map[i+1][j];
+            
+            if (p0 >= 0 && p1 >= 0 && p2 >= 0 && p3 >= 0) {
+                vtkIdType pts[4] = {p0, p1, p2, p3};
+                polys->InsertNextCell(4, pts);
+            }
+        }
+    }
+    
+    vtkPolyData* polydata = vtkPolyData::New();
+    polydata->SetPoints(points);
+    polydata->SetPolys(polys);
+    polydata->GetPointData()->SetScalars(scalars);
+    
+    return polydata;
 }
 
 void KeyenceAnalyzer::visualizeSurface(
@@ -269,20 +286,13 @@ void KeyenceAnalyzer::visualizeSurface(
     
     std::cout << "\n📊 Creating 3D surface visualization..." << std::endl;
     
-    // Create VTK structured grid
-    vtkStructuredGrid* structuredGrid = createVTKStructuredGrid(
-        heights, row_indices, col_indices);
-    
-    // Create geometry filter to convert structured grid to polydata
-    vtkSmartPointer<vtkGeometryFilter> geometryFilter = 
-        vtkSmartPointer<vtkGeometryFilter>::New();
-    geometryFilter->SetInputData(structuredGrid);
-    geometryFilter->Update();
+    // Create polydata (with gaps for NaN)
+    vtkPolyData* polydata = createVTKPolyData(heights, row_indices, col_indices);
 
     // Create mapper
     vtkSmartPointer<vtkPolyDataMapper> mapper = 
         vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper->SetInputConnection(geometryFilter->GetOutputPort());
+    mapper->SetInputData(polydata);
 
     
     // Create color lookup table (Viridis-like)
@@ -296,11 +306,8 @@ void KeyenceAnalyzer::visualizeSurface(
     mapper->SetLookupTable(lut);
     
     double range[2];
-    structuredGrid->GetScalarRange(range);
+    polydata->GetScalarRange(range);
     mapper->SetScalarRange(range);
-    
-    // Clean up structured grid (mapper has reference)
-    structuredGrid->Delete();
     
     // Create actor
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
@@ -362,6 +369,9 @@ void KeyenceAnalyzer::visualizeSurface(
     std::cout << "✅ 3D surface plot created successfully!" << std::endl;
     std::cout << "    (Close the window to continue)" << std::endl;
     interactor->Start();
+
+    // Clean up polydata
+    polydata->Delete();
 }
 
 // ═══════════════════════════════════════════════════════════════════
