@@ -22,11 +22,8 @@ cd keyence_analyzer
 # Create build directory
 mkdir build && cd build
 
-# Configure
-cmake -DCMAKE_BUILD_TYPE=Release ..
-
 # Build
-make -j4
+cmake --build . --config Release
 
 # You now have: build/keyence_analyzer
 ```
@@ -35,16 +32,16 @@ make -j4
 
 ```bash
 # Single file
-./keyence_analyzer /path/to/data.csv
+./keyence_analyzer.exe /path/to/data.csv
 
 # With custom sampling (more detail)
-./keyence_analyzer /path/to/data.csv 1000
+./keyence_analyzer.exe /path/to/data.csv 1000
 
 # Entire folder
-./keyence_analyzer /path/to/KEYENCE_DATASET
+./keyence_analyzer.exe /path/to/KEYENCE_DATASET
 
 # Folder with custom sampling
-./keyence_analyzer /path/to/KEYENCE_DATASET 800
+./keyence_analyzer.exe /path/to/KEYENCE_DATASET 800
 ```
 
 ## Usage Examples
@@ -52,7 +49,7 @@ make -j4
 ### Basic Analysis
 ```bash
 # Analyze one file with default settings (500x500 display)
-./keyence_analyzer surface_scan.csv
+./keyence_analyzer.exe surface_scan.csv
 ```
 
 **Output:**
@@ -64,7 +61,7 @@ make -j4
 ### High-Detail Visualization
 ```bash
 # Use 1000x1000 display for maximum detail
-./keyence_analyzer surface_scan.csv 1000
+./keyence_analyzer.exe surface_scan.csv 1000
 ```
 
 **Use when:**
@@ -75,7 +72,7 @@ make -j4
 ### Batch Processing
 ```bash
 # Analyze all CSV files in folder
-./keyence_analyzer ./KEYENCE_DATASET
+./keyence_analyzer.exe ./KEYENCE_DATASET
 ```
 
 **Behavior:**
@@ -87,7 +84,7 @@ make -j4
 ### Quick Preview
 ```bash
 # Fast preview with 200x200 display
-./keyence_analyzer large_file.csv 200
+./keyence_analyzer.exe large_file.csv 200
 ```
 
 **Use when:**
@@ -210,92 +207,3 @@ keyence_analyzer/
 ├── CMakeLists.txt           ← Build configuration
 └── README.md                ← Full documentation
 ```
-
-## Common Issues
-
-### "Cannot find VTK"
-```bash
-# Check VTK installation
-dpkg -l | grep vtk
-
-# If not installed:
-sudo apt-get install libvtk9-dev
-```
-
-### "Cannot find Eigen3"
-```bash
-# Install Eigen
-sudo apt-get install libeigen3-dev
-
-# Or specify location:
-cmake -DEigen3_DIR=/usr/include/eigen3 ..
-```
-
-### Visualization window is black
-```bash
-# Try software rendering
-export VTK_USE_OPENGL2=1
-./keyence_analyzer data.csv
-```
-
-### Slow visualization
-```bash
-# Use smaller display sample
-./keyence_analyzer data.csv 300
-
-# Or build in Release mode
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
-```
-
-## Performance Guide
-
-| Display Size | Points | Render Speed | Use Case |
-|--------------|--------|--------------|----------|
-| 200×200 | 40K | Very fast | Quick preview |
-| 300×300 | 90K | Fast | Standard preview |
-| 500×500 | 250K | Good | Default, balanced |
-| 800×800 | 640K | Medium | Detailed view |
-| 1000×1000 | 1M | Slower | Maximum detail |
-
-## Next Steps
-
-### Adding PCL-Based Filtering
-
-When ready to implement outlier filtering:
-
-1. **Install PCL:**
-   ```bash
-   sudo apt-get install libpcl-dev
-   ```
-
-2. **Update CMakeLists.txt:**
-   - Uncomment PCL sections
-   - Add PCL libraries to linking
-
-3. **Implement functions in keyence_filtering.cpp:**
-   - Follow TODOs and pseudocode
-   - See detailed comments for guidance
-
-4. **Integrate in keyence_analyzer.cpp:**
-   ```cpp
-   #include "keyence_filtering.h"
-   
-   Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(const Eigen::MatrixXf& raw_data) {
-       if (enable_pca_filtering_) {
-           return filterOutliersWithPCA(raw_data, pixel_pitch_x_, pixel_pitch_y_,
-                                        tile_size_, mad_threshold_);
-       }
-       return raw_data;
-   }
-   ```
-
-## Support
-
-- Full documentation: See README.md
-- Architecture details: See code comments
-- PCL integration: See keyence_filtering.h
-
-## License
-
-Provided as-is for educational and research purposes.

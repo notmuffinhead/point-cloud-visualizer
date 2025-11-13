@@ -47,19 +47,6 @@ else()
 endif()
 
 # ═══════════════════════════════════════════════════════════════════
-# PCL (Optional - for future PCA filtering)
-# ═══════════════════════════════════════════════════════════════════
-# Uncomment when ready to add PCL-based filtering:
-# find_package(PCL 1.8 QUIET COMPONENTS common features search)
-# if(PCL_FOUND)
-#     message(STATUS "Found PCL version: ${PCL_VERSION}")
-#     message(STATUS "PCL-based filtering will be available")
-#     add_definitions(-DUSE_PCL_FILTERING)
-# else()
-#     message(STATUS "PCL not found - proceeding without PCA filtering")
-# endif()
-
-# ═══════════════════════════════════════════════════════════════════
 # Include Directories
 # ═══════════════════════════════════════════════════════════════════
 include_directories(
@@ -79,12 +66,6 @@ set(HEADERS
     keyence_analyzer.h
 )
 
-# Future PCL filtering source (uncomment when implemented):
-# if(PCL_FOUND)
-#     list(APPEND SOURCES keyence_filtering.cpp)
-#     list(APPEND HEADERS keyence_filtering.h)
-# endif()
-
 # ═══════════════════════════════════════════════════════════════════
 # Create Executable
 # ═══════════════════════════════════════════════════════════════════
@@ -103,12 +84,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
     target_link_libraries(keyence_analyzer stdc++fs)
 endif()
 
-# Future PCL linking (uncomment when implemented):
-# if(PCL_FOUND)
-#     target_link_libraries(keyence_analyzer ${PCL_LIBRARIES})
-#     target_include_directories(keyence_analyzer PRIVATE ${PCL_INCLUDE_DIRS})
-#     target_compile_definitions(keyence_analyzer PRIVATE ${PCL_DEFINITIONS})
-# endif()
 
 # ═══════════════════════════════════════════════════════════════════
 # VTK Module Initialization (for VTK 9.0+)
@@ -171,12 +146,5 @@ if(OpenMP_CXX_FOUND)
 else()
     message(STATUS "  OpenMP:             Disabled")
 endif()
-# if(PCL_FOUND)
-#     message(STATUS "  PCL Version:        ${PCL_VERSION}")
-#     message(STATUS "  PCA Filtering:      Enabled")
-# else()
-    message(STATUS "  PCL:                Not configured (future feature)")
-    message(STATUS "  PCA Filtering:      Not yet implemented")
-# endif()
 message(STATUS "═══════════════════════════════════════════════════════════")
 message(STATUS "")

@@ -2,26 +2,25 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    std::cout << "═══════════════════════════════════════════════════════════" << std::endl;
+    std::cout << "===========================================================" << std::endl;
     std::cout << "    Keyence Analyzer - 3D Surface Visualization (C++)     " << std::endl;
-    std::cout << "═══════════════════════════════════════════════════════════" << std::endl;
+    std::cout << "===========================================================" << std::endl;
     std::cout << "\nFeatures:" << std::endl;
-    std::cout << "  ✓ Loads full dataset (all points)" << std::endl;
-    std::cout << "  ✓ Samples for display (adjustable, default 500×500)" << std::endl;
-    std::cout << "  ✓ Physical coordinates (2.5 μm pixel pitch)" << std::endl;
-    std::cout << "  ✓ Invalid points excluded from visualization" << std::endl;
-    std::cout << "  ✓ Interactive 3D visualization with VTK" << std::endl;
-    std::cout << "  ⧗ PCA-based outlier filtering (coming soon)" << std::endl;
+    std::cout << "   Loads full dataset (all points)" << std::endl;
+    std::cout << "   Samples for display (adjustable, default 500×500)" << std::endl;
+    std::cout << "   Physical coordinates (2.5 μm pixel pitch)" << std::endl;
+    std::cout << "   Invalid points excluded from visualization" << std::endl;
+    std::cout << "   Interactive 3D visualization with VTK" << std::endl;
     
     std::cout << "\nPipeline:" << std::endl;
-    std::cout << "  1. Load CSV → Eigen::MatrixXf" << std::endl;
+    std::cout << "  1. Load CSV --> Eigen::MatrixXf" << std::endl;
     std::cout << "  2. Replace invalid markers (-99999.9999) with NaN" << std::endl;
     std::cout << "  3. Apply filtering (future: PCA outlier detection)" << std::endl;
     std::cout << "  4. Downsample for visualization" << std::endl;
     std::cout << "  5. Render 3D surface with VTK" << std::endl;
     
     if (argc < 2) {
-        std::cout << "\n═══════════════════════════════════════════════════════════" << std::endl;
+        std::cout << "\===========================================================" << std::endl;
         std::cout << "Usage:" << std::endl;
         std::cout << "  " << argv[0] << " <csv_file_or_folder> [display_sample_size]" << std::endl;
         std::cout << "\nExamples:" << std::endl;
@@ -34,7 +33,7 @@ int main(int argc, char* argv[]) {
         std::cout << "  display_sample_size: Max rows/cols to display (default: 500)" << std::endl;
         std::cout << "                       Higher = more detail, slower rendering" << std::endl;
         std::cout << "                       Recommended range: 200-1000" << std::endl;
-        std::cout << "═══════════════════════════════════════════════════════════" << std::endl;
+        std::cout << "===========================================================" << std::endl;
         return 1;
     }
     
@@ -54,11 +53,11 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    std::cout << "\n═══════════════════════════════════════════════════════════" << std::endl;
+    std::cout << "\n===========================================================" << std::endl;
     std::cout << "Starting analysis..." << std::endl;
     std::cout << "  Path: " << path << std::endl;
     std::cout << "  Display sample size: " << display_sample_size << std::endl;
-    std::cout << "═══════════════════════════════════════════════════════════" << std::endl;
+    std::cout << "===========================================================" << std::endl;
     std::cout << std::endl;
     
     // Run the analysis

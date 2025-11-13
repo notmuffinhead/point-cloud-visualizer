@@ -135,40 +135,9 @@ int KeyenceAnalyzer::replaceInvalidValues(Eigen::MatrixXf& data) {
 // ═══════════════════════════════════════════════════════════════════
 
 Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(const Eigen::MatrixXf& raw_data) {
-    // CURRENT: Pass-through (no filtering)
-    // Simply return a copy of the raw data
-    
     // FUTURE: This is where PCA-based outlier detection will be integrated
-    // 
-    // The function will be modified to:
-    // 1. Convert Eigen::MatrixXf → pcl::PointCloud (organized)
-    // 2. Tile-based PCA analysis
-    // 3. Compute local plane fits
-    // 4. Calculate MAD (Median Absolute Deviation)
-    // 5. Mark outliers
-    // 6. Convert back to Eigen::MatrixXf with outliers as NaN
-    //
-    // Example future code structure:
-    // if (apply_pca_filtering_) {
-    //     return filterOutliersWithPCA(raw_data, tile_size_, mad_threshold_);
-    // }
-    
     return raw_data;  // Pass-through for now
 }
-
-// FUTURE METHOD SIGNATURE (commented out for now):
-/*
-Eigen::MatrixXf KeyenceAnalyzer::filterOutliersWithPCA(
-    const Eigen::MatrixXf& data,
-    int tile_size,
-    float mad_threshold) {
-    
-    // This will contain the PCL-based outlier detection logic
-    // See keyence_filtering.cpp when implemented
-    
-    return data;
-}
-*/
 
 // ═══════════════════════════════════════════════════════════════════
 // STEP 4: Sampling
@@ -284,7 +253,7 @@ void KeyenceAnalyzer::visualizeSurface(
     const std::vector<int>& row_indices,
     const std::vector<int>& col_indices) {
     
-    std::cout << "\n📊 Creating 3D surface visualization..." << std::endl;
+    std::cout << "\nCreating 3D surface visualization..." << std::endl;
     
     // Create polydata (with gaps for NaN)
     vtkPolyData* polydata = createVTKPolyData(heights, row_indices, col_indices);
@@ -366,7 +335,7 @@ void KeyenceAnalyzer::visualizeSurface(
     
     // Start interaction
     renderWindow->Render();
-    std::cout << "✅ 3D surface plot created successfully!" << std::endl;
+    std::cout << "3D surface plot created successfully!" << std::endl;
     std::cout << "    (Close the window to continue)" << std::endl;
     interactor->Start();
 
@@ -386,9 +355,9 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
     result.filename = getBasename(filepath);
     result.status = "failed";
     
-    std::cout << "🔍 KEYENCE 3D SURFACE ANALYSIS" << std::endl;
+    std::cout << "KEYENCE 3D SURFACE ANALYSIS" << std::endl;
     std::cout << "============================================================" << std::endl;
-    std::cout << "📁 File: " << result.filename << std::endl;
+    std::cout << "File: " << result.filename << std::endl;
     
     try {
         // ═══════════════════════════════════════════════════════════
@@ -396,14 +365,14 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         // ═══════════════════════════════════════════════════════════
         Eigen::MatrixXf raw_data;
         if (!loadCSV(filepath, raw_data)) {
-            std::cerr << "❌ Error loading file" << std::endl;
+            std::cerr << "Error loading file" << std::endl;
             return result;
         }
         
         result.rows = raw_data.rows();
         result.cols = raw_data.cols();
         
-        std::cout << "📋 Full dataset: " << result.rows << " rows × " 
+        std::cout << "Full dataset: " << result.rows << " rows × " 
                   << result.cols << " columns" << std::endl;
         std::cout << "   Total points: " << (result.rows * result.cols) << std::endl;
         
@@ -415,7 +384,7 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         result.valid_points = (result.rows * result.cols) - num_invalid;
         
         int total_points = result.rows * result.cols;
-        std::cout << "📊 Invalid points: " << num_invalid << "/" << total_points 
+        std::cout << "Invalid points: " << num_invalid << "/" << total_points 
                   << " (" << std::fixed << std::setprecision(1) 
                   << (100.0 * num_invalid / total_points) << "%)" << std::endl;
         
@@ -424,10 +393,9 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         // ═══════════════════════════════════════════════════════════
         // STEP 3: Apply filtering (FUTURE: PCA integration point)
         // ═══════════════════════════════════════════════════════════
-        std::cout << "🔄 Applying filtering..." << std::endl;
+        std::cout << "Applying filtering..." << std::endl;
         Eigen::MatrixXf filtered_data = applyFiltering(raw_data);
         std::cout << "   (Currently: pass-through, no filtering applied)" << std::endl;
-        // FUTURE: Will print PCA filtering statistics here
         
         result.filtered_data = filtered_data;
         
@@ -438,7 +406,7 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         Eigen::MatrixXf display_data = createDisplaySample(
             filtered_data, display_sample_size, row_indices, col_indices);
         
-        std::cout << "📊 Display sample: " << display_data.rows() << " × " 
+        std::cout << "Display sample: " << display_data.rows() << " x " 
                   << display_data.cols() << " = " 
                   << (display_data.rows() * display_data.cols()) << " points" << std::endl;
         std::cout << "   (Sampled from full dataset for performance)" << std::endl;
@@ -449,8 +417,8 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         float physical_x = result.cols * pixel_pitch_x_;  // μm
         float physical_y = result.rows * pixel_pitch_y_;  // μm
         
-        std::cout << "📏 Physical dimensions: " << std::fixed << std::setprecision(1)
-                  << physical_x << " × " << physical_y << " μm" << std::endl;
+        std::cout << "Physical dimensions: " << std::fixed << std::setprecision(1)
+                  << physical_x << " x " << physical_y << " μm" << std::endl;
         
         result.status = "success";
         
@@ -462,7 +430,7 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         return result;
         
     } catch (const std::exception& e) {
-        std::cerr << "❌ Error analyzing " << result.filename << ": " 
+        std::cerr << "Error analyzing " << result.filename << ": " 
                   << e.what() << std::endl;
         return result;
     }
@@ -479,11 +447,11 @@ std::map<std::string, AnalysisResult> KeyenceAnalyzer::analyzeAllFiles(
     std::vector<std::string> csv_files = getCSVFiles(folder_path);
     
     if (csv_files.empty()) {
-        std::cerr << "❌ No CSV files found in " << folder_path << std::endl;
+        std::cerr << "No CSV files found in " << folder_path << std::endl;
         return results_;
     }
     
-    std::cout << "📂 3D ANALYSIS OF ALL FILES" << std::endl;
+    std::cout << "3D ANALYSIS OF ALL FILES" << std::endl;
     std::cout << "Found " << csv_files.size() << " CSV files" << std::endl;
     std::cout << "============================================================" << std::endl;
     
@@ -496,7 +464,7 @@ std::map<std::string, AnalysisResult> KeyenceAnalyzer::analyzeAllFiles(
         results_[result.filename] = result;
         
         if (i < csv_files.size() - 1) {
-            std::cout << "\n⏸️  Press Enter to continue to next file (" 
+            std::cout << "\nPress Enter to continue to next file (" 
                      << (i + 2) << "/" << csv_files.size() << ")..." << std::endl;
             std::cin.ignore();
         }
@@ -514,7 +482,7 @@ std::map<std::string, AnalysisResult> KeyenceAnalyzer::analyzeAllFiles(
         }
     }
     
-    std::cout << "\n🎉 ANALYSIS COMPLETE!" << std::endl;
+    std::cout << "\nANALYSIS COMPLETE!" << std::endl;
     std::cout << "Successfully analyzed: " << success_count << " files" << std::endl;
     std::cout << "Failed analyses: " << failed_count << " files" << std::endl;
     
@@ -581,13 +549,13 @@ void quickKeyenceAnalysis(const std::string& path, int display_sample_size) {
     fs::path p(path);
     
     if (fs::is_regular_file(p) && p.extension() == ".csv") {
-        std::cout << "📁 Single file detected" << std::endl;
+        std::cout << "Single file detected" << std::endl;
         analyzeSingleKeyenceFile(path, display_sample_size);
     } else if (fs::is_directory(p)) {
-        std::cout << "📂 Folder detected - analyzing all CSV files" << std::endl;
+        std::cout << "Folder detected - analyzing all CSV files" << std::endl;
         analyzeAllKeyenceFiles(path, display_sample_size);
     } else {
-        std::cerr << "❌ Invalid path: " << path << std::endl;
+        std::cerr << "Invalid path: " << path << std::endl;
     }
 }
 
