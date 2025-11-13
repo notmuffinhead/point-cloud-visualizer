@@ -1,43 +1,43 @@
 # Keyence Analyzer - Architecture Overview
 
-## System Architecture
+## System Architecture (WITH FILTERING--NO MORE FILTERING THOUGH)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    KEYENCE ANALYZER SYSTEM                       │
-│                                                                  │
+│                    KEYENCE ANALYZER SYSTEM                      │
+│                                                                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │                   DATA LAYER (Eigen)                        │ │
-│  │                                                             │ │
+│  │                   DATA LAYER (Eigen)                       │ │
+│  │                                                            │ │
 │  │  CSV File → Eigen::MatrixXf → Processing → Visualization   │ │
-│  │             (master storage)                                │ │
+│  │             (master storage)                               │ │
 │  └────────────────────────────────────────────────────────────┘ │
-│                              │                                   │
+│                              │                                  │
 │  ┌───────────────────────────┼───────────────────────────────┐  │
-│  │                           ▼                                │  │
+│  │                           ▼                               │  │
 │  │         ┌─────────────────────────────────────┐           │  │
-│  │         │    PROCESSING PIPELINE               │           │  │
-│  │         │                                      │           │  │
-│  │         │  1. Load CSV                         │           │  │
-│  │         │  2. Handle Invalid Points            │           │  │
-│  │         │  3. Apply Filtering ◄── PCL Module   │           │  │
-│  │         │  4. Downsample                       │           │  │
-│  │         │  5. Visualize                        │           │  │
+│  │         │    PROCESSING PIPELINE              │           │  │
+│  │         │                                     │           │  │
+│  │         │  1. Load CSV                        │           │  │
+│  │         │  2. Handle Invalid Points           │           │  │
+│  │         │  3. Apply Filtering ◄── PCL Module  │           │  │
+│  │         │  4. Downsample                      │           │  │
+│  │         │  5. Visualize                       │           │  │
 │  │         └─────────────────────────────────────┘           │  │
-│  │                           │                                │  │
+│  │                           │                               │  │
 │  │         ┌─────────────────┴─────────────────┐             │  │
-│  │         ▼                                    ▼             │  │
-│  │  ┌──────────────┐                  ┌──────────────┐      │  │
-│  │  │ VTK MODULE   │                  │  PCL MODULE  │      │  │
-│  │  │ (Current)    │                  │  (Future)    │      │  │
-│  │  │              │                  │              │      │  │
-│  │  │ • Surface    │                  │ • Organized  │      │  │
-│  │  │   rendering  │                  │   clouds     │      │  │
-│  │  │ • Color map  │                  │ • PCA        │      │  │
-│  │  │ • Interactive│                  │ • Outlier    │      │  │
-│  │  │   3D view    │                  │   detection  │      │  │
-│  │  └──────────────┘                  └──────────────┘      │  │
-│  └─────────────────────────────────────────────────────────┘  │
+│  │         ▼                                   ▼             │  │
+│  │  ┌──────────────┐                  ┌──────────────┐       │  │
+│  │  │ VTK MODULE   │                  │  PCL MODULE  │       │  │
+│  │  │ (Current)    │                  │  (Future)    │       │  │
+│  │  │              │                  │              │       │  │
+│  │  │ • Surface    │                  │ • Organized  │       │  │
+│  │  │   rendering  │                  │   clouds     │       │  │
+│  │  │ • Color map  │                  │ • PCA        │       │  │
+│  │  │ • Interactive│                  │ • Outlier    │       │  │
+│  │  │   3D view    │                  │   detection  │       │  │
+│  │  └──────────────┘                  └──────────────┘       │  │
+│  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -113,35 +113,35 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                       EIGEN                                   │
+│                       EIGEN                                  │
 │  Role: Numerical data storage and operations                 │
 │                                                              │
-│  • Matrix storage (raw_data, filtered_data, display_data)   │
-│  • Element-wise operations                                  │
-│  • Efficient memory layout                                  │
-│  • NumPy-like interface                                     │
+│  • Matrix storage (raw_data, filtered_data, display_data)    │
+│  • Element-wise operations                                   │
+│  • Efficient memory layout                                   │
+│  • NumPy-like interface                                      │
 └──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
-│                       VTK                                     │
+│                       VTK                                    │
 │  Role: 3D visualization of structured grids                  │
 │                                                              │
-│  • Structured grid representation                           │
-│  • Surface rendering                                        │
-│  • Color mapping (height → color)                           │
-│  • Interactive controls                                     │
-│  • Camera manipulation                                      │
+│  • Structured grid representation                            │
+│  • Surface rendering                                         │
+│  • Color mapping (height → color)                            │
+│  • Interactive controls                                      │
+│  • Camera manipulation                                       │
 └──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
-│                       PCL (Future)                            │
+│                       PCL (Future)                           │
 │  Role: Geometric analysis and outlier detection              │
 │                                                              │
-│  • Organized point cloud support                            │
-│  • PCA computation                                          │
-│  • Covariance analysis                                      │
-│  • Plane fitting                                            │
-│  • Neighbor search (KdTree)                                 │
+│  • Organized point cloud support                             │
+│  • PCA computation                                           │
+│  • Covariance analysis                                       │
+│  • Plane fitting                                             │
+│  • Neighbor search (KdTree)                                  │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -178,7 +178,7 @@ namespace keyence {
     │  PRIVATE PIPELINE:                           │
     │  • loadCSV(filepath, data)                   │
     │  • replaceInvalidValues(data)                │
-    │  • applyFiltering(data) ◄──┐                │
+    │  • applyFiltering(data) ◄──┐                 │
     │  • createDisplaySample(data)│                │
     │  • visualizeSurface(data)   │                │
     └─────────────────────────────┼────────────────┘
@@ -201,7 +201,7 @@ namespace keyence {
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│                    IN-MEMORY STRUCTURE                      │
+│                    IN-MEMORY STRUCTURE                     │
 └────────────────────────────────────────────────────────────┘
 
 Raw Data Matrix (Full Resolution)
@@ -248,7 +248,7 @@ Raw Data Matrix (Full Resolution)
 
 ```
 ┌───────────────────────────────────────────────────────────┐
-│            PCL-BASED OUTLIER FILTERING                     │
+│            PCL-BASED OUTLIER FILTERING                    │
 └───────────────────────────────────────────────────────────┘
 
 Step 1: Conversion
@@ -314,90 +314,3 @@ keyence_analyzer/
     └── ARCHITECTURE.md           This file
 ```
 
-## Integration Points
-
-### Current → Future PCL
-
-**In keyence_analyzer.cpp:**
-
-```cpp
-// CURRENT implementation:
-Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(
-    const Eigen::MatrixXf& raw_data) {
-    
-    return raw_data;  // Pass-through
-}
-
-// FUTURE with PCL:
-#include "keyence_filtering.h"
-
-Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(
-    const Eigen::MatrixXf& raw_data) {
-    
-    if (enable_pca_filtering_) {
-        return filterOutliersWithPCA(
-            raw_data, 
-            pixel_pitch_x_, 
-            pixel_pitch_y_,
-            tile_size_, 
-            mad_threshold_
-        );
-    }
-    
-    return raw_data;
-}
-```
-
-**In CMakeLists.txt:**
-
-```cmake
-# CURRENT: PCL sections commented out
-
-# FUTURE: Uncomment these sections
-find_package(PCL 1.8 REQUIRED COMPONENTS common features)
-target_link_libraries(keyence_analyzer ${PCL_LIBRARIES})
-```
-
-## Design Principles
-
-1. **Modularity**
-   - Each library handles its specialty
-   - Clear boundaries between components
-   - Easy to add/remove features
-
-2. **Data Flow**
-   - Linear pipeline (no circular dependencies)
-   - Clear input/output at each stage
-   - Eigen as master storage
-
-3. **Future-Proof**
-   - PCL integration point clearly marked
-   - Backward compatible changes only
-   - Optional features don't break core
-
-4. **Performance**
-   - Load full data (preserve information)
-   - Sample for display (interactive speed)
-   - Efficient memory layout (Eigen)
-
-## Summary
-
-**Current State:** ✅
-- Clean, working pipeline
-- Eigen for data storage
-- VTK for visualization
-- No external dependencies beyond Eigen/VTK
-
-**Future State:** ⧗
-- Add PCL at filtering stage only
-- Rest of pipeline unchanged
-- Backward compatible
-- Optional feature
-
-**Key Insight:**
-Each library does what it's best at:
-- **Eigen**: Numerical operations
-- **VTK**: Surface visualization
-- **PCL**: Geometric analysis (future)
-
-The architecture is designed to maximize the strengths of each library while maintaining clean separation of concerns.

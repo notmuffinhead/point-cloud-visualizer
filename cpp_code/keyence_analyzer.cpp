@@ -131,16 +131,7 @@ int KeyenceAnalyzer::replaceInvalidValues(Eigen::MatrixXf& data) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// STEP 3: Filtering (FUTURE: PCA Integration Point)
-// ═══════════════════════════════════════════════════════════════════
-
-Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(const Eigen::MatrixXf& raw_data) {
-    // FUTURE: This is where PCA-based outlier detection will be integrated
-    return raw_data;  // Pass-through for now
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// STEP 4: Sampling
+// STEP 3: Sampling
 // ═══════════════════════════════════════════════════════════════════
 
 Eigen::MatrixXf KeyenceAnalyzer::createDisplaySample(
@@ -187,7 +178,7 @@ Eigen::MatrixXf KeyenceAnalyzer::createDisplaySample(
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// STEP 5: Visualization
+// STEP 4: Visualization
 // ═══════════════════════════════════════════════════════════════════
 
 vtkPolyData* KeyenceAnalyzer::createVTKPolyData(
@@ -372,7 +363,7 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         result.rows = raw_data.rows();
         result.cols = raw_data.cols();
         
-        std::cout << "Full dataset: " << result.rows << " rows × " 
+        std::cout << "Full dataset: " << result.rows << " rows x " 
                   << result.cols << " columns" << std::endl;
         std::cout << "   Total points: " << (result.rows * result.cols) << std::endl;
         
@@ -389,22 +380,13 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
                   << (100.0 * num_invalid / total_points) << "%)" << std::endl;
         
         result.raw_data = raw_data;
-        
+                
         // ═══════════════════════════════════════════════════════════
-        // STEP 3: Apply filtering (FUTURE: PCA integration point)
-        // ═══════════════════════════════════════════════════════════
-        std::cout << "Applying filtering..." << std::endl;
-        Eigen::MatrixXf filtered_data = applyFiltering(raw_data);
-        std::cout << "   (Currently: pass-through, no filtering applied)" << std::endl;
-        
-        result.filtered_data = filtered_data;
-        
-        // ═══════════════════════════════════════════════════════════
-        // STEP 4: Create display sample
+        // STEP 3: Create display sample
         // ═══════════════════════════════════════════════════════════
         std::vector<int> row_indices, col_indices;
         Eigen::MatrixXf display_data = createDisplaySample(
-            filtered_data, display_sample_size, row_indices, col_indices);
+            raw_data, display_sample_size, row_indices, col_indices);
         
         std::cout << "Display sample: " << display_data.rows() << " x " 
                   << display_data.cols() << " = " 
@@ -418,12 +400,12 @@ AnalysisResult KeyenceAnalyzer::analyzeSingleFile(
         float physical_y = result.rows * pixel_pitch_y_;  // μm
         
         std::cout << "Physical dimensions: " << std::fixed << std::setprecision(1)
-                  << physical_x << " x " << physical_y << " μm" << std::endl;
+                  << physical_x << " x " << physical_y << " um" << std::endl;
         
         result.status = "success";
         
         // ═══════════════════════════════════════════════════════════
-        // STEP 5: Visualize surface
+        // STEP 4: Visualize surface
         // ═══════════════════════════════════════════════════════════
         visualizeSurface(display_data, result.filename, row_indices, col_indices);
         

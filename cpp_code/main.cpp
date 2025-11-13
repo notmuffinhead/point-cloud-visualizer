@@ -7,17 +7,16 @@ int main(int argc, char* argv[]) {
     std::cout << "===========================================================" << std::endl;
     std::cout << "\nFeatures:" << std::endl;
     std::cout << "   Loads full dataset (all points)" << std::endl;
-    std::cout << "   Samples for display (adjustable, default 500×500)" << std::endl;
-    std::cout << "   Physical coordinates (2.5 μm pixel pitch)" << std::endl;
+    std::cout << "   Samples for display (adjustable, default 500x500)" << std::endl;
+    std::cout << "   Physical coordinates (2.5 um pixel pitch)" << std::endl;
     std::cout << "   Invalid points excluded from visualization" << std::endl;
     std::cout << "   Interactive 3D visualization with VTK" << std::endl;
     
     std::cout << "\nPipeline:" << std::endl;
     std::cout << "  1. Load CSV --> Eigen::MatrixXf" << std::endl;
     std::cout << "  2. Replace invalid markers (-99999.9999) with NaN" << std::endl;
-    std::cout << "  3. Apply filtering (future: PCA outlier detection)" << std::endl;
-    std::cout << "  4. Downsample for visualization" << std::endl;
-    std::cout << "  5. Render 3D surface with VTK" << std::endl;
+    std::cout << "  3. Downsample for visualization" << std::endl;
+    std::cout << "  4. Render 3D surface with VTK" << std::endl;
     
     if (argc < 2) {
         std::cout << "\===========================================================" << std::endl;

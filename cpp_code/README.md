@@ -68,10 +68,10 @@ Each stage is independent and can be enhanced without affecting other parts of t
 │ (display_data)  │
 └────────┬────────┘
          │
-┌────────▼────────┐
-│   Convert to    │
+┌────────▼──────────┐
+│   Convert to      │
 │ VTK StructuredGrid│
-└────────┬────────┘
+└────────┬──────────┘
          │
 ┌────────▼────────┐
 │  3D Surface     │
@@ -170,7 +170,6 @@ cd build
 
 # Configure and build
 cmake ..
-make
 
 # The executable will be in build/keyence_analyzer
 ```
@@ -245,7 +244,6 @@ int main() {
     
     // Access the data matrices
     // result.raw_data - complete Eigen::MatrixXf (all points)
-    // result.filtered_data - after filtering (currently same as raw)
     // result.display_data - downsampled for visualization
     
     // Method 2: Batch processing
@@ -306,88 +304,6 @@ The interactive 3D visualization window supports:
 | **'s' key** | Toggle surface/wireframe |
 | **'q' key** | Quit window |
 
-## Future: PCL-Based Outlier Filtering
-
-### Architecture for PCL Integration
-
-The filtering pipeline is designed to integrate PCL without affecting other components:
-
-```cpp
-// Current: applyFiltering() is a pass-through
-Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(const Eigen::MatrixXf& raw_data) {
-    return raw_data;  // No filtering
-}
-
-// Future: Add PCA-based outlier detection
-Eigen::MatrixXf KeyenceAnalyzer::applyFiltering(const Eigen::MatrixXf& raw_data) {
-    if (enable_pca_filtering_) {
-        return filterOutliersWithPCA(raw_data, tile_size_, mad_threshold_);
-    }
-    return raw_data;
-}
-```
-
-### Planned PCA Filtering Algorithm
-
-```
-For each tile in the surface:
-    1. Extract tile points (organized structure preserved)
-    2. Convert Eigen → PCL organized point cloud
-    3. Compute local PCA:
-       - Find centroid
-       - Compute covariance matrix
-       - Extract eigenvalues, eigenvectors
-       - Get best-fit plane (surface normal)
-    4. Calculate distance of each point to plane
-    5. Compute MAD (Median Absolute Deviation)
-    6. Mark outliers: |distance - median| / MAD > threshold
-    7. Convert back to Eigen with outliers as NaN
-```
-
-### Why Tile-Based MAD?
-
-**Scale-invariant filtering:**
-- **Flat regions**: Small MAD → strict filtering
-- **Sloped regions**: Large MAD → lenient filtering  
-- **Spikes**: Always have high deviation/MAD ratio → removed
-
-**Advantages:**
-- No need for global plane fitting
-- Automatically adapts to local surface characteristics
-- Fast processing (independent tiles)
-- Handles complex geometries
-
-### Future PCL Dependencies
-
-When ready to implement filtering:
-
-```bash
-# Install PCL
-sudo apt-get install libpcl-dev
-
-# Update CMakeLists.txt (uncomment PCL sections)
-# Add keyence_filtering.cpp and keyence_filtering.h
-```
-
-```cmake
-# In CMakeLists.txt (currently commented out)
-find_package(PCL 1.8 REQUIRED COMPONENTS common features search)
-target_link_libraries(keyence_analyzer ${PCL_LIBRARIES})
-```
-
-### Future File Structure
-
-```
-keyence_analyzer/
-├── keyence_analyzer.h          # Main class (current)
-├── keyence_analyzer.cpp        # Core implementation (current)
-├── keyence_filtering.h         # [FUTURE] Filtering interface
-├── keyence_filtering.cpp       # [FUTURE] PCA outlier detection
-├── conversion_utils.h          # [FUTURE] Eigen ↔ PCL conversion
-├── conversion_utils.cpp
-├── main.cpp                    # CLI interface (current)
-└── CMakeLists.txt              # Build config (current)
-```
 
 ## Performance Notes
 
@@ -446,102 +362,4 @@ Load → Filter → Sample → Visualize
 - Doesn't affect rest of pipeline
 - Backward compatible
 
-## Troubleshooting
 
-### Build Errors
-
-**Error: Cannot find Eigen3**
-```bash
-# Install Eigen3
-sudo apt-get install libeigen3-dev
-
-# Or specify path
-cmake -DEigen3_DIR=/usr/include/eigen3 ..
-```
-
-**Error: Cannot find VTK**
-```bash
-# Install VTK
-sudo apt-get install libvtk9-dev
-
-# Or build from source
-git clone https://gitlab.kitware.com/vtk/vtk.git
-cd vtk && mkdir build && cd build
-cmake .. && make -j4
-sudo make install
-```
-
-**Error: std::filesystem not found (GCC < 9)**
-```bash
-# Link filesystem library (automatically handled in CMakeLists.txt)
-# Or upgrade compiler:
-sudo apt-get install gcc-9 g++-9
-```
-
-### Runtime Errors
-
-**Error: Cannot open CSV file**
-- Check file path and permissions
-- Ensure file exists
-- Use absolute paths if relative paths fail
-
-**Error: VTK rendering fails**
-- Ensure X11 is available (Linux)
-- Check OpenGL drivers
-- Try: `export MESA_GL_VERSION_OVERRIDE=3.3`
-
-**Visualization window is black**
-- Update graphics drivers
-- Try software rendering: `export VTK_USE_OPENGL2=1`
-
-## Comparison with Python Version
-
-### Advantages of C++ Version
-- **Performance**: 5-10× faster CSV loading
-- **Memory efficiency**: Lower overhead
-- **Type safety**: Compile-time checks
-- **Native visualization**: Direct VTK integration
-- **Production ready**: No interpreter needed
-
-### Trade-offs
-- **Build complexity**: Requires compilation step
-- **Dependency management**: System-level packages
-- **Development speed**: Longer compile-test cycle
-- **Visualization**: Desktop-only (vs. Plotly web-based)
-
-## Future Roadmap
-
-- [ ] PCL-based PCA outlier filtering
-- [ ] Organized point cloud support
-- [ ] Statistical surface analysis
-- [ ] Multi-threaded batch processing
-- [ ] Export to PLY, STL, OBJ formats
-- [ ] Python bindings (pybind11)
-- [ ] GUI version (Qt or ImGui)
-- [ ] Web-based visualization option
-
-## Contributing
-
-When adding PCL filtering:
-
-1. Uncomment PCL sections in `CMakeLists.txt`
-2. Create `keyence_filtering.h` and `keyence_filtering.cpp`
-3. Implement `filterOutliersWithPCA()` method
-4. Add conversion utilities for Eigen ↔ PCL
-5. Update `applyFiltering()` to call new method
-6. Test with various datasets
-
-## License
-
-This code is provided as-is for educational and research purposes.
-
-## References
-
-- [Eigen Documentation](https://eigen.tuxfamily.org/)
-- [VTK Examples](https://kitware.github.io/vtk-examples/)
-- [Point Cloud Library (PCL)](https://pointclouds.org/)
-- [Keyence LJ-X8000 Series](https://www.keyence.com/)
-
-## Contact
-
-For questions about future PCL integration or general usage, please refer to the architecture diagrams and comments in the code.
