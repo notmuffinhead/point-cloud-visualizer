@@ -5,10 +5,13 @@ cat > .gitignore << 'EOF'
 *.bmp
 *.ply
 *.zip
+
+# folders with data/libraries
 KEYENCE_DATASET/
 OneDrive_1_9-15-2025/
 python_code/files/cleaned_output/
-cpp_code_for_jay.zip
+cpp_code/imgui/
+python_code/open3d_env
 
 # Python
 __pycache__/

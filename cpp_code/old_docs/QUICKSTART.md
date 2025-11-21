@@ -23,6 +23,7 @@ cd keyence_analyzer
 mkdir build && cd build
 
 # Build
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --config Release
 
 # You now have: build/keyence_analyzer
